@@ -13,19 +13,21 @@
         <Style x:Key="CloseBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="#44445A"/>
+            <Setter Property="Foreground" Value="#767676"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="4,2">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Padding="4,2">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#9999BB"/>
-                                <Setter Property="Background" Value="#252535"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#15000000"/>
+                                <Setter Property="Foreground" Value="#1C1C1C"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -34,11 +36,12 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#0F0F1E" CornerRadius="16"
-            BorderBrush="#252540" BorderThickness="1">
+    <!-- Light card with subtle shadow -->
+    <Border Background="#FFFFFF" CornerRadius="12"
+            BorderBrush="#DEDEDE" BorderThickness="1">
         <Border.Effect>
-            <DropShadowEffect Color="Black" Opacity="0.7"
-                              BlurRadius="20" ShadowDepth="5"/>
+            <DropShadowEffect Color="#000000" Opacity="0.12"
+                              BlurRadius="24" ShadowDepth="6"/>
         </Border.Effect>
 
         <Grid>
@@ -47,35 +50,37 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- ── Header (drag zone) ──────────────────────── -->
-            <Border Grid.Row="0" BorderBrush="#1E1E38" BorderThickness="0,0,0,1"
-                    MouseLeftButtonDown="Header_MouseDown" Background="Transparent">
+            <!-- Header / drag zone -->
+            <Border Grid.Row="0" Background="#F3F3F3"
+                    BorderBrush="#E5E5E5" BorderThickness="0,0,0,1"
+                    CornerRadius="12,12,0,0"
+                    MouseLeftButtonDown="Header_MouseDown">
                 <Grid>
-                    <TextBlock Text="S E S S I O N   H I S T O R Y"
-                               FontFamily="Segoe UI" FontSize="9" FontWeight="SemiBold"
-                               Foreground="#33334A"
+                    <TextBlock Text="Session History"
+                               FontFamily="Segoe UI" FontSize="12" FontWeight="SemiBold"
+                               Foreground="#1C1C1C"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <Button Content="✕" Style="{StaticResource CloseBtn}"
-                            FontSize="12" Width="24" Height="20"
+                            FontFamily="Segoe UI" FontSize="11"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,10,0"
                             Click="CloseWindow_Click"/>
                 </Grid>
             </Border>
 
-            <!-- ── Body ───────────────────────────────────── -->
+            <!-- Body -->
             <Grid Grid.Row="1">
                 <!-- Empty state -->
                 <StackPanel x:Name="EmptyPanel" VerticalAlignment="Center"
                             HorizontalAlignment="Center" Visibility="Collapsed">
-                    <TextBlock Text="⏱" FontSize="36" Foreground="#252540"
-                               HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <TextBlock Text="⏱" FontSize="32" Foreground="#D0D0D0"
+                               HorizontalAlignment="Center" Margin="0,0,0,10"/>
                     <TextBlock Text="No sessions recorded yet."
                                FontFamily="Segoe UI" FontSize="13"
-                               Foreground="#33334A" HorizontalAlignment="Center"/>
+                               Foreground="#767676" HorizontalAlignment="Center"/>
                     <TextBlock Text="Press ▶ then ↺ to save your first session."
                                FontFamily="Segoe UI" FontSize="11"
-                               Foreground="#28283C" HorizontalAlignment="Center"
+                               Foreground="#ABABAB" HorizontalAlignment="Center"
                                Margin="0,4,0,0"/>
                 </StackPanel>
 
@@ -87,26 +92,25 @@
                     <ItemsControl x:Name="HistoryList">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="#1A1A30" BorderThickness="0,0,0,1"
-                                        Padding="18,10">
+                                <Border BorderBrush="#F0F0F0" BorderThickness="0,0,0,1"
+                                        Padding="18,9">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Duration -->
                                         <TextBlock Grid.Column="0"
                                                    Text="{Binding FormattedDuration}"
-                                                   FontFamily="Consolas" FontSize="18"
-                                                   FontWeight="Bold" Foreground="#00D4FF"
+                                                   FontFamily="Segoe UI" FontSize="15"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#0078D4"
                                                    VerticalAlignment="Center"/>
 
-                                        <!-- Date -->
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding Date, StringFormat='ddd MMM d  HH:mm'}"
-                                                   FontFamily="Segoe UI" FontSize="10"
-                                                   Foreground="#44445A"
+                                                   FontFamily="Segoe UI" FontSize="11"
+                                                   Foreground="#ABABAB"
                                                    VerticalAlignment="Center"/>
                                     </Grid>
                                 </Border>

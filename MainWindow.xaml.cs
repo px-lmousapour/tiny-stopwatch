@@ -19,21 +19,24 @@ public partial class MainWindow : Window
     private bool _running;
     private readonly HistoryService _history = new();
 
-    private static readonly SolidColorBrush CyanBrush   = new(MediaColor.FromRgb(0, 212, 255));
-    private static readonly SolidColorBrush YellowBrush = new(MediaColor.FromRgb(255, 200, 0));
+    // Windows 11 light-theme colours
+    private static readonly SolidColorBrush BlueBrush   = new(MediaColor.FromRgb(0, 120, 212));
+    private static readonly SolidColorBrush YellowBrush = new(MediaColor.FromRgb(196, 98, 0));
+    private static readonly SolidColorBrush DarkBrush   = new(MediaColor.FromRgb(28, 28, 28));
 
     public MainWindow()
     {
         InitializeComponent();
         _timer.Tick += (_, _) => Refresh();
-        PositionNearTaskbar();
+        PositionOnTaskbar();
     }
 
-    private void PositionNearTaskbar()
+    private void PositionOnTaskbar()
     {
-        var area = SystemParameters.WorkArea;
-        Left = area.Right  - Width  - 14;
-        Top  = area.Bottom - Height - 14;
+        // Span the full screen width; sit flush above the taskbar
+        Width = SystemParameters.PrimaryScreenWidth;
+        Left  = 0;
+        Top   = SystemParameters.WorkArea.Bottom - Height;
     }
 
     private void Refresh()
@@ -62,16 +65,18 @@ public partial class MainWindow : Window
         {
             _sw.Stop();
             _timer.Stop();
-            PlayPauseIcon.Text = "▶";
-            PlayPauseIcon.Foreground = CyanBrush;
+            PlayPauseIcon.Text       = "▶";
+            PlayPauseIcon.Foreground = BlueBrush;
+            TimerDisplay.Foreground  = DarkBrush;
         }
         else
         {
             _sw.Start();
             _timer.Start();
-            PlayPauseIcon.Text = "⏸";
+            PlayPauseIcon.Text       = "⏸";
             PlayPauseIcon.Foreground = YellowBrush;
-            ResetBtn.IsEnabled = true;
+            TimerDisplay.Foreground  = YellowBrush;
+            ResetBtn.IsEnabled       = true;
         }
         _running = !_running;
     }
@@ -85,9 +90,10 @@ public partial class MainWindow : Window
         _timer.Stop();
         _running = false;
 
-        PlayPauseIcon.Text = "▶";
-        PlayPauseIcon.Foreground = CyanBrush;
-        ResetBtn.IsEnabled = false;
+        PlayPauseIcon.Text       = "▶";
+        PlayPauseIcon.Foreground = BlueBrush;
+        TimerDisplay.Foreground  = DarkBrush;
+        ResetBtn.IsEnabled       = false;
         Refresh();
     }
 

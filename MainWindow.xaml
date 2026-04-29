@@ -2,70 +2,38 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Tiny Stopwatch"
-        Width="250" Height="148"
+        Height="44"
         ResizeMode="NoResize"
         WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
+        AllowsTransparency="False"
+        Background="#F3F3F3"
         Topmost="True"
         ShowInTaskbar="True"
         WindowStartupLocation="Manual">
 
     <Window.Resources>
-        <!-- Round icon button used for Play/Pause, Reset, History -->
-        <Style x:Key="RoundBtn" TargetType="Button">
-            <Setter Property="Width" Value="40"/>
-            <Setter Property="Height" Value="40"/>
+        <Style x:Key="FlatBtn" TargetType="Button">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#1C1C30"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="20">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#28283C"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#35355A"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Bd" Property="Opacity" Value="0.3"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Transparent text-only close button -->
-        <Style x:Key="CloseBtn" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="#44445A"/>
-            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="10"
-                                Padding="3,1">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#9999BB"/>
-                                <Setter Property="Background" Value="#252535"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#18000000"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#28000000"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -74,84 +42,78 @@
         </Style>
     </Window.Resources>
 
-    <!-- Outer container: rounded dark card with shadow -->
-    <Border Background="#0F0F1E" CornerRadius="18"
-            BorderBrush="#252540" BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect Color="Black" Opacity="0.7"
-                              BlurRadius="20" ShadowDepth="5"/>
-        </Border.Effect>
+    <!-- Top border acts as a visible separator from content above -->
+    <Border BorderBrush="#C8C8C8" BorderThickness="0,1,0,0"
+            Background="#F3F3F3"
+            MouseLeftButtonDown="DragBar_MouseDown">
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="28"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="56"/>
-            </Grid.RowDefinitions>
-
-            <!-- ── Title bar (drag zone) ─────────────────────── -->
-            <Grid Grid.Row="0" Background="Transparent"
-                  MouseLeftButtonDown="DragBar_MouseDown">
-                <TextBlock Text="S T O P W A T C H"
-                           FontFamily="Segoe UI" FontSize="8" FontWeight="SemiBold"
-                           Foreground="#33334A"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <Button Content="✕" Style="{StaticResource CloseBtn}"
-                        FontSize="11" Width="22" Height="18"
-                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Margin="0,0,8,0"
-                        Click="HideWindow_Click"/>
-            </Grid>
-
-            <!-- ── Timer display ─────────────────────────────── -->
-            <TextBlock x:Name="TimerDisplay" Grid.Row="1"
-                       Text="00:00.0"
-                       FontFamily="Consolas" FontSize="32" FontWeight="Bold"
-                       Foreground="#00D4FF"
-                       HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Effect>
-                    <DropShadowEffect Color="#00AAFF" Opacity="0.55"
-                                      BlurRadius="12" ShadowDepth="0"/>
-                </TextBlock.Effect>
-            </TextBlock>
-
-            <!-- ── Controls row ──────────────────────────────── -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Margin="0,0,0,4">
-
+        <Grid Margin="10,0,8,0">
+            <Grid.ColumnDefinitions>
                 <!-- Play / Pause -->
-                <Button x:Name="PlayPauseBtn"
-                        Style="{StaticResource RoundBtn}"
-                        BorderBrush="#00D4FF"
-                        Click="PlayPause_Click"
-                        Margin="5,0"
-                        ToolTip="Start / Pause (Space)">
-                    <TextBlock x:Name="PlayPauseIcon" Text="▶"
-                               FontSize="15" Foreground="#00D4FF"
-                               Margin="3,0,0,0"/>
-                </Button>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Reset -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Thin separator -->
+                <ColumnDefinition Width="1"/>
+                <!-- Timer -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Flexible spacer -->
+                <ColumnDefinition Width="*"/>
+                <!-- History -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Hide -->
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Reset (saves to history) -->
-                <Button x:Name="ResetBtn"
-                        Style="{StaticResource RoundBtn}"
-                        BorderBrush="#FF6B6B"
-                        IsEnabled="False"
-                        Click="Reset_Click"
-                        Margin="5,0"
-                        ToolTip="Reset — saves current time to history">
-                    <TextBlock Text="↺" FontSize="20" Foreground="#FF6B6B"/>
-                </Button>
+            <!-- ▶ / ⏸ -->
+            <Button x:Name="PlayPauseBtn" Grid.Column="0"
+                    Style="{StaticResource FlatBtn}"
+                    Click="PlayPause_Click"
+                    ToolTip="Start / Pause  (Space)">
+                <TextBlock x:Name="PlayPauseIcon" Text="▶"
+                           FontFamily="Segoe UI" FontSize="10"
+                           Foreground="#0078D4"/>
+            </Button>
 
-                <!-- History shortcut -->
-                <Button Style="{StaticResource RoundBtn}"
-                        BorderBrush="#5A5A7A"
-                        Click="History_Click"
-                        Margin="5,0"
-                        ToolTip="View session history">
-                    <TextBlock Text="☰" FontSize="15" Foreground="#5A5A7A"/>
-                </Button>
-            </StackPanel>
+            <!-- ↺ reset -->
+            <Button x:Name="ResetBtn" Grid.Column="1"
+                    Style="{StaticResource FlatBtn}"
+                    IsEnabled="False"
+                    Click="Reset_Click"
+                    Margin="2,0,0,0"
+                    ToolTip="Reset — saves session to history">
+                <TextBlock Text="↺" FontFamily="Segoe UI" FontSize="13"
+                           Foreground="#C42B1C"/>
+            </Button>
+
+            <!-- Vertical separator -->
+            <Border Grid.Column="2" Width="1" Background="#D4D4D4"
+                    VerticalAlignment="Center" Height="18" Margin="8,0"/>
+
+            <!-- Timer digits — same Segoe UI size as taskbar clock -->
+            <TextBlock x:Name="TimerDisplay" Grid.Column="3"
+                       Text="00:00.0"
+                       FontFamily="Segoe UI" FontSize="12"
+                       Foreground="#1C1C1C"
+                       VerticalAlignment="Center"
+                       Margin="4,0,0,0"/>
+
+            <!-- History button -->
+            <Button Grid.Column="5" Style="{StaticResource FlatBtn}"
+                    Click="History_Click"
+                    ToolTip="View session history">
+                <TextBlock Text="☰" FontFamily="Segoe UI" FontSize="10"
+                           Foreground="#767676"/>
+            </Button>
+
+            <!-- Hide-to-tray -->
+            <Button Grid.Column="6" Style="{StaticResource FlatBtn}"
+                    Click="HideWindow_Click"
+                    Margin="2,0,0,0"
+                    ToolTip="Hide to tray">
+                <TextBlock Text="✕" FontFamily="Segoe UI" FontSize="9"
+                           Foreground="#767676"/>
+            </Button>
         </Grid>
     </Border>
 </Window>
