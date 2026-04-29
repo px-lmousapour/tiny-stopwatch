@@ -1,0 +1,120 @@
+<Window x:Class="TinyStopwatch.HistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Session History"
+        Width="340" Height="440"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="CloseBtn" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#44445A"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="4,2">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#9999BB"/>
+                                <Setter Property="Background" Value="#252535"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#0F0F1E" CornerRadius="16"
+            BorderBrush="#252540" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.7"
+                              BlurRadius="20" ShadowDepth="5"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Header (drag zone) ──────────────────────── -->
+            <Border Grid.Row="0" BorderBrush="#1E1E38" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Header_MouseDown" Background="Transparent">
+                <Grid>
+                    <TextBlock Text="S E S S I O N   H I S T O R Y"
+                               FontFamily="Segoe UI" FontSize="9" FontWeight="SemiBold"
+                               Foreground="#33334A"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button Content="✕" Style="{StaticResource CloseBtn}"
+                            FontSize="12" Width="24" Height="20"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,10,0"
+                            Click="CloseWindow_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- ── Body ───────────────────────────────────── -->
+            <Grid Grid.Row="1">
+                <!-- Empty state -->
+                <StackPanel x:Name="EmptyPanel" VerticalAlignment="Center"
+                            HorizontalAlignment="Center" Visibility="Collapsed">
+                    <TextBlock Text="⏱" FontSize="36" Foreground="#252540"
+                               HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <TextBlock Text="No sessions recorded yet."
+                               FontFamily="Segoe UI" FontSize="13"
+                               Foreground="#33334A" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Press ▶ then ↺ to save your first session."
+                               FontFamily="Segoe UI" FontSize="11"
+                               Foreground="#28283C" HorizontalAlignment="Center"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Session list -->
+                <ScrollViewer x:Name="ListScroller"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="0,4,0,8">
+                    <ItemsControl x:Name="HistoryList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#1A1A30" BorderThickness="0,0,0,1"
+                                        Padding="18,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Duration -->
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding FormattedDuration}"
+                                                   FontFamily="Consolas" FontSize="18"
+                                                   FontWeight="Bold" Foreground="#00D4FF"
+                                                   VerticalAlignment="Center"/>
+
+                                        <!-- Date -->
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Date, StringFormat='ddd MMM d  HH:mm'}"
+                                                   FontFamily="Segoe UI" FontSize="10"
+                                                   Foreground="#44445A"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
