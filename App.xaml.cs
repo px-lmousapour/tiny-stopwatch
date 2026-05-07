@@ -1,6 +1,4 @@
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Shell;
 using WinForms = System.Windows.Forms;
 using Application = System.Windows.Application;
@@ -12,15 +10,31 @@ namespace TinyStopwatch;
 
 public partial class App : Application
 {
-    [DllImport("user32.dll")]
-    private static extern bool DestroyIcon(IntPtr hIcon);
-
     private WinForms.NotifyIcon? _trayIcon;
     private MainWindow? _mainWindow;
     private System.Drawing.Icon? _trayIconObj;
+    private Mutex? _instanceMutex;
+    private EventWaitHandle? _activateEvent;
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        _instanceMutex = new Mutex(true, "TinyStopwatch_SingleInstance", out bool isFirst);
+        if (!isFirst)
+        {
+            // Signal the already-running instance to show itself, then quit.
+            try { EventWaitHandle.OpenExisting("TinyStopwatch_Activate").Set(); } catch { }
+            Shutdown();
+            return;
+        }
+
+        // Primary instance: listen for activation signals from future launches.
+        _activateEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "TinyStopwatch_Activate");
+        new Thread(() =>
+        {
+            while (_activateEvent?.WaitOne() == true)
+                Dispatcher.Invoke(BringToFront);
+        }) { IsBackground = true }.Start();
+
         base.OnStartup(e);
 
         SetupJumpList();
@@ -36,6 +50,14 @@ public partial class App : Application
         }
 
         InitializeTray();
+    }
+
+    private void BringToFront()
+    {
+        if (_mainWindow == null) return;
+        _mainWindow.Show();
+        _mainWindow.WindowState = WindowState.Normal;
+        _mainWindow.Activate();
     }
 
     private void SetupJumpList()
@@ -115,38 +137,19 @@ public partial class App : Application
 
     private static System.Drawing.Icon CreateTrayIcon()
     {
-        const int sz = 32;
-        using var bmp = new Bitmap(sz, sz, PixelFormat.Format32bppArgb);
-        using (var g = Graphics.FromImage(bmp))
-        {
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            g.Clear(Color.Transparent);
-
-            var cyan = Color.FromArgb(0, 212, 255);
-            using var pen = new System.Drawing.Pen(cyan, 2f);
-            using var brush = new SolidBrush(cyan);
-
-            // Stopwatch body
-            g.DrawEllipse(pen, 3, 6, 26, 24);
-            // Hour and minute hands
-            g.DrawLine(pen, 16, 18, 16, 12);
-            g.DrawLine(pen, 16, 18, 22, 18);
-            // Crown / stem
-            g.FillRectangle(brush, 13, 3, 6, 3);
-            // Start button (left side bump)
-            g.DrawArc(pen, 1, 11, 4, 5, 90, 180);
-        }
-
-        var hIcon = bmp.GetHicon();
-        var icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(hIcon).Clone();
-        DestroyIcon(hIcon);
-        return icon;
+        // Load the real stopwatch icon from the embedded resource
+        var uri = new Uri("pack://application:,,,/stopwatch.ico");
+        using var stream = System.Windows.Application.GetResourceStream(uri)!.Stream;
+        return new System.Drawing.Icon(stream, new System.Drawing.Size(32, 32));
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
         _trayIcon?.Dispose();
         _trayIconObj?.Dispose();
+        _activateEvent?.Close();
+        _instanceMutex?.ReleaseMutex();
+        _instanceMutex?.Dispose();
         base.OnExit(e);
     }
 }

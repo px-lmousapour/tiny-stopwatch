@@ -33,7 +33,7 @@ public class HistoryService
         Save(entries);
     }
 
-    private static void Save(List<StopwatchEntry> entries)
+    public static void Save(List<StopwatchEntry> entries)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(HistoryPath)!);
         File.WriteAllText(HistoryPath, JsonSerializer.Serialize(entries,
